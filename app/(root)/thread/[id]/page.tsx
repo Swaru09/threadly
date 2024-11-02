@@ -6,15 +6,17 @@ import ThreadCard from "@/components/cards/ThreadCard";
 
 import { fetchUser } from "@/lib/actions/user.actions";
 import { fetchThreadById } from "@/lib/actions/thread.actions";
-interface PageProps{
-  params:{
-    id:string;
-  }
+
+interface PageProps {
+  params: Promise<{ id: string }>;
 }
+
 export const revalidate = 0;
 
-async function page({ params }: { params: { id: string } }) {
-  if (!params.id) return null;
+async function Page({ params }: PageProps) {
+  // Await params since it’s now a Promise in Next.js 15
+  const resolvedParams = await params;
+  if (!resolvedParams.id) return null;
 
   const user = await currentUser();
   if (!user) return null;
@@ -22,10 +24,10 @@ async function page({ params }: { params: { id: string } }) {
   const userInfo = await fetchUser(user.id);
   if (!userInfo?.onboarded) redirect("/onboarding");
 
-  const thread = await fetchThreadById(params.id);
+  const thread = await fetchThreadById(resolvedParams.id);
 
   return (
-    <section className='relative'>
+    <section className="relative">
       <div>
         <ThreadCard
           id={thread._id}
@@ -39,15 +41,15 @@ async function page({ params }: { params: { id: string } }) {
         />
       </div>
 
-      <div className='mt-7'>
+      <div className="mt-7">
         <Comment
-          threadId={params.id}
+          threadId={resolvedParams.id}
           currentUserImg={user.imageUrl}
           currentUserId={JSON.stringify(userInfo._id)}
         />
       </div>
 
-      <div className='mt-10'>
+      <div className="mt-10">
         {thread.children.map((childItem: any) => (
           <ThreadCard
             key={childItem._id}
@@ -67,4 +69,4 @@ async function page({ params }: { params: { id: string } }) {
   );
 }
 
-export default page;
+export default Page;

@@ -7,11 +7,14 @@ import Pagination from "@/components/shared/Pagination";
 
 import { fetchUser, fetchUsers } from "@/lib/actions/user.actions";
 
-async function Page({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined };
-}) {
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}
+
+async function Page({ searchParams }: PageProps) {
+  // Await searchParams since it’s now a Promise in Next.js 15
+  const resolvedSearchParams = await searchParams;
+
   const user = await currentUser();
   if (!user) return null;
 
@@ -20,20 +23,20 @@ async function Page({
 
   const result = await fetchUsers({
     userId: user.id,
-    searchString: searchParams.q,
-    pageNumber: searchParams?.page ? +searchParams.page : 1,
+    searchString: resolvedSearchParams.q,
+    pageNumber: resolvedSearchParams?.page ? +resolvedSearchParams.page : 1,
     pageSize: 25,
   });
 
   return (
     <section>
-      <h1 className='head-text mb-10'>Search</h1>
+      <h1 className="head-text mb-10">Search</h1>
 
-      <Searchbar routeType='search' />
+      <Searchbar routeType="search" />
 
-      <div className='mt-14 flex flex-col gap-9'>
+      <div className="mt-14 flex flex-col gap-9">
         {result.users.length === 0 ? (
-          <p className='no-result'>No Result</p>
+          <p className="no-result">No Result</p>
         ) : (
           <>
             {result.users.map((person) => (
@@ -43,7 +46,7 @@ async function Page({
                 name={person.name}
                 username={person.username}
                 imgUrl={person.image}
-                personType='User'
+                personType="User"
               />
             ))}
           </>
@@ -51,8 +54,8 @@ async function Page({
       </div>
 
       <Pagination
-        path='search'
-        pageNumber={searchParams?.page ? +searchParams.page : 1}
+        path="search"
+        pageNumber={resolvedSearchParams?.page ? +resolvedSearchParams.page : 1}
         isNext={result.isNext}
       />
     </section>
