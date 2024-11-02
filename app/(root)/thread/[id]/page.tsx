@@ -6,7 +6,11 @@ import ThreadCard from "@/components/cards/ThreadCard";
 
 import { fetchUser } from "@/lib/actions/user.actions";
 import { fetchThreadById } from "@/lib/actions/thread.actions";
-
+interface PageProps{
+  params:{
+    id:string;
+  }
+}
 export const revalidate = 0;
 
 async function page({ params }: { params: { id: string } }) {
